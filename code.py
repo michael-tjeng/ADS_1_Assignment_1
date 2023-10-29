@@ -52,6 +52,26 @@ if __name__ == "__main__":
     
     plot_sales_over_time(top_countries_data, top_countries)
 
+# Extracting hour information from InvoiceDate
+data['Hour'] = data.index.hour
 
+# Grouping data by hour and summing total sales
+sales_by_hour = data.groupby('Hour')['TotalSales'].sum().reset_index()
 
+sales_by_hour.head()
 
+def plot_sales_by_hour(sales_by_hour):
+    plt.figure(figsize=(10, 6))
+    plt.bar(sales_by_hour['Hour'], sales_by_hour['TotalSales'], color='skyblue')
+    
+    # Formatting
+    plt.title('Sales by Hour of the Day')
+    plt.xlabel('Hour of the Day')
+    plt.ylabel('Total Sales (£)')
+    plt.xticks(range(24))  # Set x-ticks to show every hour
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+# Plot bar chart
+plot_sales_by_hour(sales_by_hour)
