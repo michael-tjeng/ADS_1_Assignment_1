@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-# define function to load csv and preprocess data
+# Define function to load CSV and preprocess data
 def load_and_preprocess_data(file_path):
     data = pd.read_csv(file_path, encoding='latin1')
     data['InvoiceDate'] = pd.to_datetime(data['InvoiceDate'], errors='coerce')
@@ -19,12 +19,15 @@ def load_and_preprocess_data(file_path):
     data.set_index('InvoiceDate', inplace=True)
     return data
 
+# Define function to get monthly sales
 def get_monthly_sales(data):
     return data.groupby('Country').resample('M')['TotalSales'].sum().reset_index()
 
+# Define function to get top countries
 def get_top_countries(monthly_sales, n=5):
     return monthly_sales.groupby('Country')['TotalSales'].sum().nlargest(n).index
 
+# Define function to plot sales over time
 def plot_sales_over_time(top_countries_data, top_countries):
     plt.figure(figsize=(14, 7))
     for country in top_countries:
@@ -40,31 +43,17 @@ def plot_sales_over_time(top_countries_data, top_countries):
     plt.grid(True)
     plt.tight_layout()
     plt.show()
-    
-# main program
-if __name__ == "__main__":
-    pd.set_option('display.max.columns', None)
-    
-    data = load_and_preprocess_data('data.csv')
-    monthly_sales = get_monthly_sales(data)
-    top_countries = get_top_countries(monthly_sales)
-    top_countries_data = monthly_sales[monthly_sales['Country'].isin(top_countries)]
-    
-    plot_sales_over_time(top_countries_data, top_countries)
 
-# Extracting hour information from InvoiceDate
-data['Hour'] = data.index.hour
+# Define function to get sales by hour
+def get_sales_by_hour(data):
+    data['Hour'] = data.index.hour
+    sales_by_hour = data.groupby('Hour')['TotalSales'].sum().reset_index()
+    return sales_by_hour
 
-# Grouping data by hour and summing total sales
-sales_by_hour = data.groupby('Hour')['TotalSales'].sum().reset_index()
-
-sales_by_hour.head()
-
+# Define function to plot sales by hour
 def plot_sales_by_hour(sales_by_hour):
     plt.figure(figsize=(10, 6))
     plt.bar(sales_by_hour['Hour'], sales_by_hour['TotalSales'], color='skyblue')
-    
-    # Formatting
     plt.title('Sales by Hour of the Day')
     plt.xlabel('Hour of the Day')
     plt.ylabel('Total Sales (£)')
@@ -73,5 +62,19 @@ def plot_sales_by_hour(sales_by_hour):
     plt.tight_layout()
     plt.show()
 
-# Plot bar chart
-plot_sales_by_hour(sales_by_hour)
+# Main program
+if __name__ == "__main__":
+    pd.set_option('display.max.columns', None)
+    
+    # Load and preprocess data
+    data = load_and_preprocess_data('data.csv')
+    
+    # Monthly sales analysis
+    monthly_sales = get_monthly_sales(data)
+    top_countries = get_top_countries(monthly_sales)
+    top_countries_data = monthly_sales[monthly_sales['Country'].isin(top_countries)]
+    plot_sales_over_time(top_countries_data, top_countries)
+    
+    # Sales by hour analysis
+    sales_by_hour = get_sales_by_hour(data)
+    plot_sales_by_hour(sales_by_hour)
