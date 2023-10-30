@@ -62,6 +62,24 @@ def plot_sales_by_hour(sales_by_hour):
     plt.tight_layout()
     plt.show()
 
+# Define function to plot total sales by country with a legend
+def plot_total_sales_by_country(data):
+    total_sales_by_country = data.groupby('Country')['TotalSales'].sum().sort_values(ascending=False)
+    top_5_countries = total_sales_by_country.head(5)
+    other_countries_sum = total_sales_by_country[5:].sum()
+    pie_data = top_5_countries.append(pd.Series(other_countries_sum, index=['Other Countries']))
+    
+    explode = (0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
+    colors = plt.cm.Paired(range(len(pie_data)))
+    
+    plt.figure(figsize=(7, 7))
+    wedges, texts = plt.pie(pie_data, startangle=140, explode=explode, colors=colors, textprops=dict(color="w"))
+    labels = [f"{label}: {perc:.1f}% ({amount:,.0f} £)" for label, perc, amount in zip(pie_data.index, 100*pie_data/pie_data.sum(), pie_data)]
+    plt.legend(wedges, labels, title="Countries", loc="center left", bbox_to_anchor=(0.8, 0, 0.5, 1))
+    plt.title('Total Sales by Country')
+    plt.axis('equal')
+    plt.show()
+
 # Main program
 if __name__ == "__main__":
     pd.set_option('display.max.columns', None)
@@ -79,42 +97,6 @@ if __name__ == "__main__":
     sales_by_hour = get_sales_by_hour(data)
     plot_sales_by_hour(sales_by_hour)
     
-# Step 1: Calculate the total sales for each country
-total_sales_by_country = data.groupby('Country')['TotalSales'].sum().sort_values(ascending=False)
-
-# Step 2: Select the top 5 countries based on total sales
-top_5_countries = total_sales_by_country.head(5)
-other_countries = total_sales_by_country[5:]
-
-# Show the total sales by country
-total_sales_by_country.head(10)  # Displaying top 10 for a clearer view
-    
-# Step 3: Combine the sales of all other countries into a single "Other Countries" category
-other_countries_sum = other_countries.sum()
-pie_data = top_5_countries.append(pd.Series(other_countries_sum, index=['Other Countries']))
-
-# Creating the exploding pie chart with a legend for country names and percentages
-
-# Function to format the labels with country name and percentage
-def func(pct, allvalues):
-    absolute = int(pct/100.*sum(allvalues))
-    return "{:.1f}%\n({:d} £)".format(pct, absolute)
-
-# Explode all slices
-explode = (0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
-
-# Colors
-colors = plt.cm.Paired(range(len(pie_data)))
-
-# Plotting the pie chart without percentages on the slices
-plt.figure(figsize=(10, 7))
-wedges, texts = plt.pie(pie_data, startangle=140, explode=explode, colors=colors, textprops=dict(color="w"))
-
-# Adding legend with percentages
-labels = [f"{label}: {perc:.1f}% ({amount:,.0f} £)" for label, perc, amount in zip(pie_data.index, 100*pie_data/pie_data.sum(), pie_data)]
-plt.legend(wedges, labels, title="Countries", loc="center left", bbox_to_anchor=(0.8, 0, 0.5, 1))
-
-plt.title('Total Sales by Country')
-plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-plt.show()
+    # Total sales by country with a legend
+    plot_total_sales_by_country(data)
 
