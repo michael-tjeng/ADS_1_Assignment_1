@@ -9,7 +9,6 @@ Created on Sat Oct 28 10:50:36 2023
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
 
 # Define function to load CSV and preprocess data
 def load_and_preprocess_data(file_path):
@@ -46,8 +45,9 @@ def plot_total_monthly_sales(monthly_sales):
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
+    plt.savefig('total_monthly_sales.png', dpi=300)
     plt.show()
-
+    
 # Define function to get sales by hour
 def get_sales_by_hour(data):
     data['Hour'] = data.index.hour
@@ -64,6 +64,7 @@ def plot_sales_by_hour(sales_by_hour):
     plt.xticks(range(24))  # Set x-ticks to show every hour
     plt.grid(axis='y', linestyle='--', alpha=0.7)
     plt.tight_layout()
+    plt.savefig('sales_by_hour.png', dpi=300)
     plt.show()
 
 # Define function to plot total sales by country with a legend
@@ -76,13 +77,19 @@ def plot_total_sales_by_country(data):
     explode = (0.1, 0.1, 0.1, 0.1, 0.1, 0.1)
     colors = plt.cm.Paired(range(len(pie_data)))
     
-    plt.figure(figsize=(7, 7))
+    plt.figure(figsize=(10, 7))  # Increased width to accommodate the legend
     wedges, texts = plt.pie(pie_data, startangle=140, explode=explode, colors=colors, textprops=dict(color="w"))
     labels = [f"{label}: {perc:.1f}% ({amount:,.0f} £)" for label, perc, amount in zip(pie_data.index, 100*pie_data/pie_data.sum(), pie_data)]
-    plt.legend(wedges, labels, title="Countries", loc="center left", bbox_to_anchor=(0.8, 0, 0.5, 1))
+    
+    # Adjusted legend position
+    plt.legend(wedges, labels, title="Countries", loc="center left", bbox_to_anchor=(0.9, 0, 0.5, 1))
+    
     plt.title('Total Sales by Country')
     plt.axis('equal')
+    plt.tight_layout()
+    plt.savefig('total_sales_by_country.png', dpi=300, bbox_inches='tight')
     plt.show()
+
 
 # Main program
 if __name__ == "__main__":
