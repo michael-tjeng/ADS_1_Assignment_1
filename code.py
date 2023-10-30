@@ -8,6 +8,7 @@ Created on Sat Oct 28 10:50:36 2023
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator
 
 # Define function to load CSV and preprocess data
@@ -27,19 +28,22 @@ def get_monthly_sales(data):
 def get_top_countries(monthly_sales, n=5):
     return monthly_sales.groupby('Country')['TotalSales'].sum().nlargest(n).index
 
-# Define function to plot sales over time
-def plot_sales_over_time(top_countries_data, top_countries):
-    plt.figure(figsize=(14, 7))
-    for country in top_countries:
-        country_data = top_countries_data[top_countries_data['Country'] == country]
-        plt.plot(country_data['InvoiceDate'], country_data['TotalSales'], label=country)
-    plt.title('Monthly Sales Over Time by Country')
+# Define function to plot total monthly sales
+def plot_total_monthly_sales(monthly_sales):
+    plt.figure(figsize=(10, 7))
+    total_monthly_sales = monthly_sales.groupby('InvoiceDate')['TotalSales'].sum()
+    plt.plot(total_monthly_sales.index, total_monthly_sales.values, label='Total Sales')
+    
+    # Setting x-axis ticks to every month and formatting labels
+    plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d-%m-%Y'))
+    
+    plt.title('Total Monthly Sales Over Time')
     plt.xlabel('Date')
     plt.ylabel('Total Sales (£)')
     plt.xticks(rotation=45)
-    plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=6))
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: "{:,}".format(int(x))))
-    plt.legend(title='Country')
+    plt.legend()
     plt.grid(True)
     plt.tight_layout()
     plt.show()
@@ -52,7 +56,7 @@ def get_sales_by_hour(data):
 
 # Define function to plot sales by hour
 def plot_sales_by_hour(sales_by_hour):
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 7))
     plt.bar(sales_by_hour['Hour'], sales_by_hour['TotalSales'], color='skyblue')
     plt.title('Sales by Hour of the Day')
     plt.xlabel('Hour of the Day')
@@ -89,9 +93,7 @@ if __name__ == "__main__":
     
     # Monthly sales analysis
     monthly_sales = get_monthly_sales(data)
-    top_countries = get_top_countries(monthly_sales)
-    top_countries_data = monthly_sales[monthly_sales['Country'].isin(top_countries)]
-    plot_sales_over_time(top_countries_data, top_countries)
+    plot_total_monthly_sales(monthly_sales)
     
     # Sales by hour analysis
     sales_by_hour = get_sales_by_hour(data)
@@ -99,4 +101,3 @@ if __name__ == "__main__":
     
     # Total sales by country with a legend
     plot_total_sales_by_country(data)
-
